@@ -1,0 +1,24 @@
+commit cd38fbadf7b79cc6f801067a18fa0e08da1f48e4
+Merge: 69d5250 45eac53
+Author: Manisha M <2805164@vikes.csuohio.edu>
+Date:   Tue Apr 19 12:31:55 2022 -0400
+
+    Merge branch 'main' of https://github.com/prathap2822/todo_app_avengers
+
+commit 69d5250f591eacc25e0d227b5485745eeaa9f7d2
+Author: Manisha M <2805164@vikes.csuohio.edu>
+Date:   Mon Apr 18 22:52:33 2022 -0400
+
+    Added the three feature HTML pages
+
+commit 45eac53d83d2601a49979f9614a03940582df1b7
+Author: prathap2822 <103482874+prathap2822@users.noreply.github.com>
+Date:   Sun Apr 17 23:56:10 2022 -0400
+
+    Create README.md
+
+commit 38d93044363216e4ce2c5e6badeb92b8bd37b27a
+Author: Prathap D <2822401@vikes.csuohio.edu>
+Date:   Sun Apr 17 23:34:14 2022 -0400
+
+    Initial commit | Boilerplate code
