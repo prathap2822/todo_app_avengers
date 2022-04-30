@@ -1,3 +1,5 @@
 tasks.info
 *.sqlite
 secretkey.py
+__pychache__
+test.ipynb

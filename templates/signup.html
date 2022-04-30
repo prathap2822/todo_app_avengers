@@ -5,25 +5,25 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Todo App</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    <script src='main.js'></script>
+    <!-- <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js'></script> -->
     <script>
         function check(){
             pass1 = document.getElementById("password")
             pass2 = document.getElementById("password_cnfrm")
             if (pass1.text == pass2.text) {
-                console.log('Yay')
+                document.getElementById("submit_button").disabled = false;
             }
         }
     </script>
 </head>
 <body>
-    <form action="/signUpUser" method="post">
+    <form action="/signup" method="post">
         <input type="text" name="username" id="username" placeholder="username" required><br>
         <input type="email" name="email" id="email" placeholder="email" required><br>
         <input type="password" name="user_password" id="password" placeholder="password" required><br>
         <input type="password" name="user_password_cnfrm" id="password_cnfrm" placeholder="re-enter password" onchange="check()" required><br>
-        <button type="submit" id="submit_button">Sign Up</button>
+        <button type="submit" id="submit_button" disabled >Sign Up</button>
     </form>
 </body>
 </html>
