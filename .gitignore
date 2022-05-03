@@ -1,5 +1,6 @@
 tasks.info
 *.sqlite
 secretkey.py
-__pychache__
+__pychache__/
 test.ipynb
+.vscode

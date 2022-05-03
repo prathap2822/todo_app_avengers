@@ -1,12 +1,14 @@
 from datetime import datetime
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from secretkey import key
 from werkzeug.security import generate_password_hash, check_password_hash
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 
-
-
+logging.basicConfig(filename=r'.\logs\user.log', encoding='utf-8', level=logging.DEBUG)
 app = Flask(__name__)
 app.secret_key = key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
@@ -103,7 +105,7 @@ def signUp():
     user.set_password(request.form['user_password'])
     db.session.add(user)
     db.session.commit()
-    print("done")
+    logging.info(msg="{} signed up at {}".format(request.form['username'], datetime.now()))
     return render_template('index.html')
 
 @app.route('/loginUser', methods=['GET','POST'])
@@ -124,7 +126,7 @@ def login():
             username = curr.fetchone()[0]
             session['username'] = username
             session['active'] = True
-            print('Logged in')
+            logging.info(msg="{} logged in at {}".format(request.form['username'], datetime.now()))
             curr = conn.execute("SELECT * FROM 'todoitems' WHERE username ='{}'".format(username))
             todos = curr.fetchall()
             return render_template('welcome.html', exists = exists, session = session, todos= todos)
