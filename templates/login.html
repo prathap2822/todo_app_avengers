@@ -8,18 +8,25 @@
     <!-- <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
     <script src='main.js'></script> -->
 </head>
-<body>
-    <form action="/login" method="post">
-        <input type="text" name="email" placeholder="email" required>
-        <input type="text" name="password" placeholder="password" required>
-        {% if 'error' in session.keys() %}
-            <div style="display: inline; color: red;">
-                {{session['error']}}
-            </div>
-        {% endif %}
-        <br>
-        <button type="submit">Login</button>
-    </form>
+<body >
+    <center>
+        <h1>Login with your creds</h1>
+        <form action="/login" method="post">
+            <input type="text" name="username" placeholder="username" required>
+            <br>
+            <br>
+            <input type="password" name="password" placeholder="password" required>
+            {% if 'error' in session.keys() %}
+                <div style="display: inline; color: red;">
+                    {{session['error']}}
+                </div>
+            {% endif %}
+            <br>
+            <br>
+            <br>
+            <button type="submit">Login</button>
+        </form>
+    </center>
 
 </body>
 </html>

@@ -1,9 +1,13 @@
 from datetime import datetime
+import email
 from flask import Flask, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from secretkey import key
 from werkzeug.security import generate_password_hash, check_password_hash
 import logging
+from email_user import Mailer
+
+
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -14,6 +18,8 @@ app.secret_key = key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+mailer = Mailer()
 
 class User(db.Model):
     """User account model."""
@@ -98,13 +104,19 @@ def signUpUser():
 @app.route('/signup', methods=['POST','GET'])
 def signUp():
     user = User(name = request.form['username'], email = request.form['email'])
-    exists = db.session.query(db.exists().where(User.email == request.form['email'])).scalar()
+    exists = db.session.query(db.exists().where(User.email == request.form['email'])).scalar() or db.session.query(db.exists().where(User.name == request.form['username'])).scalar()
     if(exists):
         session['username'] = request.form['username']
         return render_template('login.html', exists = exists)
     user.set_password(request.form['user_password'])
     db.session.add(user)
     db.session.commit()
+    try:
+        mailer.message(subject="Avengers To-do Application", text="""Hello {},\n\nThank you for registering with Avengers To-Do application. \nVisit http://avengers2.pythonanywhere.com/ to manage your To-Do list.\n\nRegards,\nAvengers Team""".format(request.form['username']))
+        mailer.send(to=[request.form['email']])
+        mailer.close()
+    except:
+        pass
     logging.info(msg="{} signed up at {}".format(request.form['username'], datetime.now()))
     return render_template('index.html')
 
@@ -114,19 +126,19 @@ def loginUser():
 
 @app.route('/login', methods=['GET','POST'])
 def login():
-    email = request.form['email']
+    username = request.form['username']
     password = request.form['password']
-    exists = db.session.query(db.exists().where(User.email == email)).scalar()
+    exists = db.session.query(db.exists().where(User.name == username)).scalar()
     if(exists):
         conn = db.engine.connect()
-        curr = conn.execute("SELECT password FROM 'flasklogin-users' WHERE email='{e}'".format(e=email))
+        curr = conn.execute("SELECT password FROM 'flasklogin-users' WHERE name='{e}'".format(e=username))
         passHash = curr.fetchone()[0]
         if(check_password_hash(passHash,password)):
-            curr = conn.execute("SELECT name FROM 'flasklogin-users' WHERE email='{e}'".format(e=email))
+            curr = conn.execute("SELECT name FROM 'flasklogin-users' WHERE name='{e}'".format(e=username))
             username = curr.fetchone()[0]
             session['username'] = username
             session['active'] = True
-            logging.info(msg="{} logged in at {}".format(request.form['username'], datetime.now()))
+            logging.info(msg="{} logged in at {}".format(username, datetime.now()))
             curr = conn.execute("SELECT * FROM 'todoitems' WHERE username ='{}'".format(username))
             todos = curr.fetchall()
             return render_template('welcome.html', exists = exists, session = session, todos= todos)
@@ -144,11 +156,16 @@ def addTodo(username):
     db.session.add(todo)
     db.session.commit()
     session['username'] = username
+
+
+    conn = db.engine.connect()
+    curr = conn.execute("SELECT email FROM 'flasklogin-users' where name='{}'".format(username))
+    email = curr.fetchone()[0]
+
     e = db.engine
     with e.connect() as conn:
         curr = conn.execute("SELECT * FROM 'todoitems' WHERE username ='{}'".format(username))
         todos = curr.fetchall()
-    
     return render_template('welcome.html',session = session, todos = todos)
 
 @app.route('/deleteTodo/<username>/<id>', methods = ['POST', 'GET'])
@@ -161,6 +178,25 @@ def deleteTodo(username, id):
         todos = curr.fetchall()
     return render_template('welcome.html',session = session, todos = todos)
 
+@app.route('/calendarView/<username>')
+def calendarView(username):
+    data = {}
+    with db.engine.connect() as conn:
+        curr = conn.execute("SELECT * FROM 'todoitems' WHERE username='{}' ORDER BY due_date".format(username))
+        data = curr.fetchall()
+    return render_template('calendar.html', data = data, username=username)
+
+@app.route('/welcome/<username>')
+def welcome(username):
+    session = {}
+    session['username'] = username
+    return render_template('welcome.html', session=session)
+
+@app.route('/logout')
+def logout():
+    return render_template('index.html')
+
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

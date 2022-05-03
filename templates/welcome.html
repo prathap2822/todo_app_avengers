@@ -4,22 +4,29 @@
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Welcome</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    <script src='main.js'></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
-    <h1>Welcome {{session['username']}}</h1>
-    <form action="/addTodo/{{session['username']}}" method="post">
+<body style="margin: 2%; font-size: 14px;">
+    <h1 class="jumbotron text-center" style="font-size: 20px; display: inline;" >Welcome {{session['username']}}</h1>
+    <div style="display: inline-flex; float: right;"><a href="/logout"><button>Log out</button></a></div>
+    <br><br><br>
+    <form action="/addTodo/{{session['username']}}" method="post" "> 
         <input type="text" name="todo_title" id="todo_title" placeholder="title" required>
         <input type="text" name="todo_description" id="todo_description" placeholder="description" required>
         <input type="date" name="duedate" id="duedate" placeholder="duedate" required>
         <button type="submit">Add To-do</button>
     </form>
-    <ol>
-        {% for todo in todos %}
-            <li>{{todo}}</li><a style="display: inline;" href="/deleteTodo/{{session['username']}}/{{todo.todo_id}}"><button style="display: inline;">Delete</button></a>
-        {% endfor %}
-    </ol>
+    <a href="/calendarView/{{session['username']}}" style="display: inline; float: right;"><button>Calendar View</button></a>
+    <div style="padding: 5%; margin-right: 25%;">
+        <ol>
+            {% for todo in todos %}
+                <li >{{todo.title}} - {{todo.description}} - Due on {{todo.due_date}} <div style="display: inline;"><a href="/deleteTodo/{{session['username']}}/{{todo.todo_id}}"><button style="display: inline; float: right; font-size: 10px;">Delete</button></a></div></li>
+            {% endfor %}
+        </ol>
+    </div>
 </body>
 </html>
