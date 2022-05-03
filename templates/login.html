@@ -12,7 +12,14 @@
     <form action="/login" method="post">
         <input type="text" name="email" placeholder="email" required>
         <input type="text" name="password" placeholder="password" required>
+        {% if 'error' in session.keys() %}
+            <div style="display: inline; color: red;">
+                {{session['error']}}
+            </div>
+        {% endif %}
+        <br>
         <button type="submit">Login</button>
     </form>
+
 </body>
 </html>

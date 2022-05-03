@@ -9,6 +9,17 @@
     <script src='main.js'></script>
 </head>
 <body>
-    <h1>Welcome {{session['username']}} 🔥</h1>
+    <h1>Welcome {{session['username']}}</h1>
+    <form action="/addTodo/{{session['username']}}" method="post">
+        <input type="text" name="todo_title" id="todo_title" placeholder="title" required>
+        <input type="text" name="todo_description" id="todo_description" placeholder="description" required>
+        <input type="date" name="duedate" id="duedate" placeholder="duedate" required>
+        <button type="submit">Add To-do</button>
+    </form>
+    <ol>
+        {% for todo in todos %}
+            <li>{{todo}}</li><a style="display: inline;" href="/deleteTodo/{{session['username']}}/{{todo.todo_id}}"><button style="display: inline;">Delete</button></a>
+        {% endfor %}
+    </ol>
 </body>
 </html>

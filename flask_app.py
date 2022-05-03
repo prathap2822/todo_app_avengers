@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, session
+from datetime import datetime
+from flask import Flask, redirect, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from secretkey import key
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -23,7 +24,7 @@ class User(db.Model):
     name = db.Column(
         db.String(100),
         nullable=False,
-        unique=False
+        unique=True
     )
     email = db.Column(
         db.String(40),
@@ -50,6 +51,38 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User {}>'.format(self.name)
+
+class Todo(db.Model):
+    __tablename__ = 'todoitems'
+    todo_id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+    username = db.Column(
+        db.String(40),
+        nullable=False
+    )
+    title = db.Column(
+        db.String(40),
+        nullable=False
+    )
+    description = db.Column(
+        db.String(100),
+        nullable=False
+    )
+    due_date = db.Column(
+        db.Date(),
+        nullable=False
+    )
+    created_date = db.Column(
+        db.Date(),
+        nullable=False
+    )
+    def __init__(self, username: str) -> None:
+        self.username = username
+        self.created_date = datetime.now()
+        __tablename__ = 'todoitems'
+        super().__init__()
 
 @app.route('/')
 def index():
@@ -90,9 +123,42 @@ def login():
             curr = conn.execute("SELECT name FROM 'flasklogin-users' WHERE email='{e}'".format(e=email))
             username = curr.fetchone()[0]
             session['username'] = username
-            return render_template('welcome.html', exists = exists, session = session)
-        return render_template('welcome.html', exists = exists)
-    return render_template('index.html')
+            session['active'] = True
+            print('Logged in')
+            curr = conn.execute("SELECT * FROM 'todoitems' WHERE username ='{}'".format(username))
+            todos = curr.fetchall()
+            return render_template('welcome.html', exists = exists, session = session, todos= todos)
+        return render_template('login.html', exists = exists, session = {'error': 'Incorrect Password or email'})
+    return render_template('login.html', session = {'error': 'Incorrect Password or email'})
+
+@app.route('/addTodo/<username>', methods = ['POST'])
+def addTodo(username):
+    todo = Todo(username=username)
+    todo.title = request.form['todo_title']
+    todo.description = request.form['todo_description']
+    todo.username = username
+    date = request.form['duedate']
+    todo.due_date = datetime(year=int(date[0:4]), month=int(date[5:7]), day=int(date[8:10]))
+    db.session.add(todo)
+    db.session.commit()
+    session['username'] = username
+    e = db.engine
+    with e.connect() as conn:
+        curr = conn.execute("SELECT * FROM 'todoitems' WHERE username ='{}'".format(username))
+        todos = curr.fetchall()
+    
+    return render_template('welcome.html',session = session, todos = todos)
+
+@app.route('/deleteTodo/<username>/<id>', methods = ['POST', 'GET'])
+def deleteTodo(username, id):
+    e = db.engine
+    with e.connect() as conn:
+        curr = conn.execute("DELETE FROM 'todoitems' WHERE username ='{}' and todo_id = '{}';".format(username, id))
+        db.session.commit()
+        curr = conn.execute("SELECT * FROM 'todoitems' WHERE username ='{}'".format(username))
+        todos = curr.fetchall()
+    return render_template('welcome.html',session = session, todos = todos)
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
